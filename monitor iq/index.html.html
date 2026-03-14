@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المرصد الشامل | الأحداث المباشرة</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- FontAwesome JS for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <div class="logo-icon-wrapper">
+                    <i class="fas fa-radar pulse-logo"></i>
+                </div>
+                <div>
+                    <h1>المرصد الشامل</h1>
+                    <span class="subtitle">نظام المراقبة المتقدم</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section-title">أنظمة التتبع العالمية</div>
+                
+                <a href="#" class="nav-item active" data-target="world-monitor">
+                    <i class="fas fa-globe-americas nav-icon text-blue"></i>
+                    <span>المرصد العالمي</span>
+                    <div class="active-indicator"></div>
+                </a>
+                
+                <a href="#" class="nav-item" data-target="flightradar">
+                    <i class="fas fa-plane nav-icon text-yellow"></i>
+                    <span>Flightradar24</span>
+                    <div class="active-indicator"></div>
+                </a>
+                
+                <a href="#" class="nav-item" data-target="marinetraffic">
+                    <i class="fas fa-ship nav-icon text-cyan"></i>
+                    <span>Marine Traffic</span>
+                    <div class="active-indicator"></div>
+                </a>
+                
+                <a href="#" class="nav-item" data-target="liveuamap">
+                    <i class="fas fa-map-marked-alt nav-icon text-orange"></i>
+                    <span>Liveuamap</span>
+                    <div class="active-indicator"></div>
+                </a>
+                
+                <a href="#" class="nav-item" data-target="warstrikes">
+                    <i class="fas fa-crosshairs nav-icon text-red"></i>
+                    <span>War Strikes</span>
+                    <div class="active-indicator"></div>
+                </a>
+                
+                <a href="#" class="nav-item" data-target="mts">
+                    <i class="fas fa-anchor nav-icon text-teal"></i>
+                    <span>MTS System</span>
+                    <div class="active-indicator"></div>
+                </a>
+            </nav>
+            
+            <!-- Contextual controls for Local Map (only visible when World Monitor is active) -->
+            <div class="layers-container" id="localLayers">
+                <div class="nav-section-title">طبقات الخريطة المحلية</div>
+                <div class="layers-grid">
+                    <label class="layer-toggle"><input type="checkbox" value="conflicts" checked> <span class="custom-checkbox"></span> الصراعات <i class="fas fa-bomb icon-red"></i></label>
+                    <label class="layer-toggle"><input type="checkbox" value="bases" checked> <span class="custom-checkbox"></span> القواعد <i class="fas fa-building-shield icon-blue"></i></label>
+                    <label class="layer-toggle"><input type="checkbox" value="hotspots" checked> <span class="custom-checkbox"></span> التوتر <i class="fas fa-fire icon-orange"></i></label>
+                    <label class="layer-toggle"><input type="checkbox" value="nuclear"> <span class="custom-checkbox"></span> نووي <i class="fas fa-radiation icon-yellow"></i></label>
+                </div>
+            </div>
+            
+            <!-- Live TV Section -->
+            <div class="live-tv-container">
+                <div class="tv-header">
+                    <h3><i class="fas fa-satellite-dish pulse-icon"></i> البث المباشر</h3>
+                    <div class="tv-tabs">
+                        <button class="tv-tab active" data-channel="jazeera">الجزيرة</button>
+                        <button class="tv-tab" data-channel="hadath">الحدث</button>
+                    </div>
+                </div>
+                <div class="video-wrapper glass-panel-dark">
+                    <!-- Default to Al Jazeera id, can be changed via JS -->
+                    <iframe id="tvIframe" width="100%" height="100%" src="https://www.youtube.com/embed/live_stream?channel=UCfiwzLy-8yKzIbsmZTzxDgw&autoplay=1&mute=1" title="Live TV" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content (Iframes / Map views) -->
+        <main class="main-content">
+            <header class="top-bar glass-panel">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span id="currentViewTitle">المرصد العالمي - متصل</span>
+                </div>
+                
+                <div class="time-widget">
+                    <i class="far fa-clock"></i>
+                    <span id="liveClock">00:00:00</span>
+                    <span id="liveDate" class="text-muted"></span>
+                </div>
+            </header>
+            
+            <div class="views-container glass-panel-no-border">
+                <!-- Layer: World Monitor (Leaflet Map) -->
+                <div id="view-world-monitor" class="view-layer active">
+                    <div id="map" class="map-container"></div>
+                    <!-- Info Panel for Map -->
+                    <div class="info-panel glass-panel" id="infoPanel">
+                        <button class="close-btn" id="closeInfoPanel"><i class="fas fa-times"></i></button>
+                        <div class="info-content" id="infoContent"></div>
+                    </div>
+                </div>
+
+                <!-- Layer: Flightradar24 -->
+                <div id="view-flightradar" class="view-layer">
+                    <iframe class="tracking-iframe" src="https://globe.adsbexchange.com/?pwa"></iframe>
+                    <!-- fallback to full flightradar if ADSB Exchange is not completely suitable, but ADSB is great for embeds -->
+                </div>
+
+                <!-- Layer: Marine Traffic -->
+                <div id="view-marinetraffic" class="view-layer">
+                    <iframe class="tracking-iframe" src="https://embed.vesselfinder.com/"></iframe>
+                </div>
+
+                <!-- Layer: Liveuamap -->
+                <div id="view-liveuamap" class="view-layer">
+                    <iframe class="tracking-iframe" src="https://liveuamap.com/"></iframe>
+                </div>
+
+                <!-- Layer: War Strikes -->
+                <div id="view-warstrikes" class="view-layer">
+                    <iframe class="tracking-iframe" src="https://syria.liveuamap.com/"></iframe>
+                </div>
+
+                <!-- Layer: MTS -->
+                <div id="view-mts" class="view-layer">
+                    <iframe class="tracking-iframe" src="https://www.myshiptracking.com/"></iframe>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+ 
